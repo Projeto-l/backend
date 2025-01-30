@@ -1,0 +1,51 @@
+# Diretório de build do Maven
+target/
+*.jar
+*.war
+*.ear
+
+# Arquivos do IntelliJ IDEA
+.idea/
+*.iml
+
+# Arquivos do Eclipse
+.classpath
+.project
+.settings/
+
+# Arquivos do VS Code
+.vscode/
+
+# Logs e caches
+logs/
+*.log
+hs_err_pid*
+
+# Arquivos temporários do sistema operacional
+.DS_Store
+Thumbs.db
+
+# Arquivos de configuração do banco de dados local
+*.h2.db
+*.mv.db
+*.pgdata
+
+# Dependências baixadas pelo Maven (caso não use um repositório remoto)
+.mvn/
+!mvn/wrapper/maven-wrapper.jar
+
+# Docker
+docker-compose.override.yml
+.env
+
+HELP.md
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.factorypath
+.settings
+.springBeans
+.sts4-cache
