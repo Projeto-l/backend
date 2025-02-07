@@ -16,7 +16,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**")) // Desativa CSRF para H2
                 .headers(headers -> headers.frameOptions().disable()) // Permite frames para o console do H2
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/h2-console/**").permitAll() // Permite acesso sem login ao H2
+                        .requestMatchers("/**").permitAll()
+
                         .anyRequest().authenticated()) // Protege outras rotas
                 .formLogin(); // Mantém login para outras páginas
 

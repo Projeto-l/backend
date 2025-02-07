@@ -3,12 +3,12 @@ version: '3.8'
 services:
   postgres:
     image: postgres:15
-    container_name: postgres_db_postgres
+    container_name: medcom_db
     restart: always
     environment:
-      POSTGRES_DB: medcom
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: medcom
+      POSTGRES_PASSWORD: medcom123
+      POSTGRES_DB: medcom_db
     ports:
       - "5432:5432"
     volumes:
