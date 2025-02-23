@@ -1,4 +1,4 @@
-package com.medcom.medcom;
+package com.medcom;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
