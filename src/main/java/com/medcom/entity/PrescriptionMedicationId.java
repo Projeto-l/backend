@@ -9,6 +9,7 @@ import java.util.UUID;
 @Data
 public class PrescriptionMedicationId {
     private UUID prescriptionId;
+
     private UUID medicationId;
 
 }

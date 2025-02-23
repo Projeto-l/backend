@@ -19,8 +19,9 @@ public class PrescriptionMedication {
     private Medication medication;
 
     private double dosage;
-    private String frequency;
-    private String duration;
 
+    private String frequency;
+
+    private String duration;
 
 }
