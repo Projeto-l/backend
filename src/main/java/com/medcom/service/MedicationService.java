@@ -22,7 +22,7 @@ public class MedicationService {
         return medicationRepository.findAll();
     }
 
-    public Optional<Medication> findById(UUID id) {
+    public Optional<Medication> findById(Integer id) {
         return medicationRepository.findById(id);
     }
 
@@ -30,7 +30,7 @@ public class MedicationService {
         return medicationRepository.save(medication);
     }
 
-    public void deleteById(UUID id) {
+    public void deleteById(Integer id) {
         medicationRepository.deleteById(id);
     }
 }

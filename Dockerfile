@@ -1,14 +1,10 @@
-# Usa a imagem oficial do JDK 17 como base
-FROM eclipse-temurin:17-jdk-alpine
-
-# Define o diretório de trabalho dentro do container
-WORKDIR /app
-
-# Copia o arquivo JAR do build para o container
-COPY target/*.jar app.jar
-
-# Expõe a porta padrão do Spring Boot
+FROM openjdk:17-jdk-alpine
 EXPOSE 8080
 
-# Define o comando de execução
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENV ENVIRONMENT="local"
+ENV JVM_OPTIONS=""
+
+VOLUME /tmp
+COPY ./target/*.jar medcom-backend.jar
+
+CMD ["sh", "-c", "exec java ${JVM_OPTIONS} -Dspring.profiles.active=${ENVIRONMENT} -jar medcom-backend.jar"]

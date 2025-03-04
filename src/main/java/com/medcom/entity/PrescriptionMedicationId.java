@@ -8,7 +8,7 @@ import java.util.UUID;
 @Embeddable
 @Data
 public class PrescriptionMedicationId {
-    private UUID prescriptionId;
-    private UUID medicationId;
+    private Integer prescriptionId;
+    private Integer medicationId;
 
 }

@@ -3,30 +3,37 @@ version: '3.8'
 services:
   postgres:
     image: postgres:15
-    container_name: medcom_db
-    restart: always
+    container_name: postgres-medcom
     environment:
-      POSTGRES_USER: medcom
-      POSTGRES_PASSWORD: medcom123
-      POSTGRES_DB: medcom_db
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
+
+    env_file:
+      - .env
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  app:
-    build: .
-    container_name: back_end_postgres
-    restart: always
+  medcom_backend:
+    build:
+      context: .
+    container_name: medcom_backend
     depends_on:
       - postgres
     environment:
-      SPRING_PROFILES_ACTIVE: prod
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/medcom_db
-      SPRING_DATASOURCE_USERNAME: medcom
-      SPRING_DATASOURCE_PASSWORD: medcom123
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
     ports:
       - "8080:8080"
+    env_file:
+      - .env
 
 volumes:
   postgres_data:
+
+networks:
+  custom_network:
+    driver: bridge

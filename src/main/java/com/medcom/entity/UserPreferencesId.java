@@ -9,6 +9,6 @@ import java.util.UUID;
 @Embeddable
 @Data
 public class UserPreferencesId {
-    private UUID userId;
-    private UUID medicationId;
+    private Integer userId;
+    private Integer medicationId;
 }

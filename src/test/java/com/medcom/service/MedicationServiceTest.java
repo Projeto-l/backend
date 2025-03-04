@@ -29,7 +29,7 @@ public @ExtendWith(MockitoExtension.class)
     @BeforeEach
     void setUp() {
         medication = new Medication();
-        medication.setMedicationId(UUID.randomUUID());
+        medication.setMedicationId(1);
         medication.setName("Paracetamol");
         medication.setPresentation("Liquid 100mg/mL");
     }

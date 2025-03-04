@@ -22,7 +22,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public Optional<User> findById(UUID id) {
+    public Optional<User> findById(Integer id) {
         return userRepository.findById(id);
     }
 
@@ -30,7 +30,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public void deleteById(UUID id) {
+    public void deleteById(Integer id) {
         userRepository.deleteById(id);
     }
 }

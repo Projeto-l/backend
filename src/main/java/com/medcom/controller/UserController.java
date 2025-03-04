@@ -29,7 +29,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get user by ID")
-    public ResponseEntity<Optional<User>> getUserById(@PathVariable UUID id) {
+    public ResponseEntity<Optional<User>> getUserById(@PathVariable Integer id) {
         return ResponseEntity.ok(userService.findById(id));
     }
 
@@ -41,7 +41,7 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete user by ID")
-    public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
+    public ResponseEntity<Void> deleteUser(@PathVariable Integer id) {
         userService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

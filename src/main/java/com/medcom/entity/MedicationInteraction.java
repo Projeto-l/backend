@@ -12,5 +12,4 @@ public class MedicationInteraction {
 
     private String description;
 
-    // Getters and Setters
 }

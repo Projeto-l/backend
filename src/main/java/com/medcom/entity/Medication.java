@@ -14,7 +14,7 @@ import java.util.UUID;
 public class Medication {
     @Id
     @GeneratedValue
-    private UUID medicationId;
+    private Integer medicationId;
 
     private String name;
     private String presentation;

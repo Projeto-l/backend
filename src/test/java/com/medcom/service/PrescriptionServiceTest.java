@@ -31,7 +31,7 @@ class PrescriptionServiceTest {
     @BeforeEach
     void setUp() {
         prescription = new Prescription();
-        prescription.setPrescriptionId(UUID.randomUUID());
+        prescription.setPrescriptionId(1);
         prescription.setNotes("Take every 6 hours");
     }
 

@@ -13,7 +13,7 @@ import java.util.UUID;
 public class User {
     @Id
     @GeneratedValue
-    private UUID userId;
+    private Integer userId;
 
     private String name;
     private String email;

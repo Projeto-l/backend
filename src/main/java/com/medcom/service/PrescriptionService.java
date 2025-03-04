@@ -22,7 +22,7 @@ public class PrescriptionService {
         return prescriptionRepository.findAll();
     }
 
-    public Optional<Prescription> findById(UUID id) {
+    public Optional<Prescription> findById(Integer id) {
         return prescriptionRepository.findById(id);
     }
 
@@ -30,7 +30,7 @@ public class PrescriptionService {
         return prescriptionRepository.save(prescription);
     }
 
-    public void deleteById(UUID id) {
+    public void deleteById(Integer id) {
         prescriptionRepository.deleteById(id);
     }
 }

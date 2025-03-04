@@ -11,7 +11,7 @@ import java.util.UUID;
 public class Prescription {
     @Id
     @GeneratedValue
-    private UUID prescriptionId;
+    private Integer prescriptionId;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
