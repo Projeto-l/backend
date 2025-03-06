@@ -31,7 +31,6 @@ public @ExtendWith(MockitoExtension.class)
         medication = new Medication();
         medication.setMedicationId(UUID.randomUUID());
         medication.setName("Paracetamol");
-        medication.setPresentation("Liquid 100mg/mL");
     }
 
     @Test
