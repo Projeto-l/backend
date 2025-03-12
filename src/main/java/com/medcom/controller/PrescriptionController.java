@@ -1,20 +1,20 @@
 package com.medcom.controller;
 
+import com.medcom.dto.PrescriptionDTO;
 import com.medcom.entity.Prescription;
 import com.medcom.service.PrescriptionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/prescriptions")
 @Tag(name = "Prescription Controller", description = "Endpoints for managing prescriptions")
 public class PrescriptionController {
+
     private final PrescriptionService prescriptionService;
 
     public PrescriptionController(PrescriptionService prescriptionService) {
@@ -29,14 +29,15 @@ public class PrescriptionController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get prescription by ID")
-    public ResponseEntity<Optional<Prescription>> getPrescriptionById(@PathVariable UUID id) {
+    public ResponseEntity<Prescription> getPrescriptionById(@PathVariable UUID id) {
         return ResponseEntity.ok(prescriptionService.findById(id));
     }
 
     @PostMapping
     @Operation(summary = "Create a new prescription")
-    public ResponseEntity<Prescription> createPrescription(@RequestBody Prescription prescription) {
-        return ResponseEntity.ok(prescriptionService.save(prescription));
+    public ResponseEntity<Prescription> createPrescription(@RequestBody PrescriptionDTO dto) {
+        Prescription saved = prescriptionService.createFromDTO(dto);
+        return ResponseEntity.ok(saved);
     }
 
     @DeleteMapping("/{id}")
