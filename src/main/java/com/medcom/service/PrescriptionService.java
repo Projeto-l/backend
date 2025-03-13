@@ -1,23 +1,23 @@
 package com.medcom.service;
 
+import com.medcom.dto.InteractionPairDTO;
 import com.medcom.dto.PrescriptionDTO;
 import com.medcom.dto.PrescriptionMedicationDTO;
+import com.medcom.dto.PrescriptionResponseDTO;
 import com.medcom.entity.Medication;
-import com.medcom.entity.User;
 import com.medcom.entity.Prescription;
 import com.medcom.entity.PrescriptionMedication;
+import com.medcom.entity.User;
 import com.medcom.repository.MedicationRepository;
 import com.medcom.repository.PrescriptionRepository;
 import com.medcom.repository.UserRepository;
-
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -26,18 +26,19 @@ public class PrescriptionService {
     private final PrescriptionRepository prescriptionRepository;
     private final MedicationRepository medicationRepository;
     private final UserRepository userRepository;
+    private final MedicationInteractionService medicationInteractionService;
 
-    private static final Logger log = LoggerFactory.getLogger(PrescriptionService.class);
-    
-
-    public PrescriptionService(PrescriptionRepository prescriptionRepository, MedicationRepository medicationRepository,
-            UserRepository userRepository) {
+    public PrescriptionService(PrescriptionRepository prescriptionRepository,
+                               MedicationRepository medicationRepository,
+                               UserRepository userRepository,
+                               MedicationInteractionService medicationInteractionService) {
         this.prescriptionRepository = prescriptionRepository;
         this.medicationRepository = medicationRepository;
         this.userRepository = userRepository;
+        this.medicationInteractionService = medicationInteractionService;
     }
 
-    public Prescription createFromDTO(PrescriptionDTO dto) {
+    public PrescriptionResponseDTO createFromDTO(PrescriptionDTO dto) {
         System.out.println("Received DTO: " + dto);
         if (dto.getUserId() == null) {
             throw new IllegalArgumentException("userId must not be null");
@@ -46,12 +47,12 @@ public class PrescriptionService {
         User user = userRepository.findById(dto.getUserId())
             .orElseThrow(() -> new IllegalArgumentException("User not found for ID: " + dto.getUserId()));
         System.out.println("Loaded User: " + user);
-    
+
         Prescription prescription = new Prescription();
         prescription.setUser(user);
         prescription.setPatientName(dto.getPatientName());
         System.out.println("Created Prescription: " + prescription);
-    
+
         if (dto.getItems() != null) {
             List<PrescriptionMedication> pmList = new ArrayList<>();
             for (PrescriptionMedicationDTO item : dto.getItems()) {
@@ -59,7 +60,7 @@ public class PrescriptionService {
                 Medication managedMed = medicationRepository.findById(item.getMedicationId())
                     .orElseThrow(() -> new IllegalArgumentException("Medication not found for ID: " + item.getMedicationId()));
                 System.out.println("Loaded Medication: " + managedMed);
-    
+
                 PrescriptionMedication pm = new PrescriptionMedication();
                 pm.setPrescription(prescription);
                 pm.setMedication(managedMed);
@@ -75,9 +76,20 @@ public class PrescriptionService {
         }
         Prescription saved = prescriptionRepository.save(prescription);
         System.out.println("Saved Prescription: " + saved);
-        return saved;
+
+        // Extrai a lista de medicamentos usados (únicos) na prescrição
+        List<Medication> medicationsUsed = saved.getPrescriptionMedications().stream()
+                .map(PrescriptionMedication::getMedication)
+                .distinct()
+                .collect(Collectors.toList());
+
+        // Chama o serviço de interações para verificar se há interações entre os medicamentos
+        List<InteractionPairDTO> interactions = medicationInteractionService.findInteractions(medicationsUsed);
+        System.out.println("Found interactions: " + interactions);
+
+        // Cria e retorna o DTO de resposta contendo a prescrição e as interações
+        return new PrescriptionResponseDTO(saved, interactions);
     }
-    
 
     public List<Prescription> findAll() {
         return prescriptionRepository.findAll();
