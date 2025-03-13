@@ -1,6 +1,7 @@
 package com.medcom.controller;
 
 import com.medcom.dto.PrescriptionDTO;
+import com.medcom.dto.PrescriptionResponseDTO;
 import com.medcom.entity.Prescription;
 import com.medcom.service.PrescriptionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,9 +36,9 @@ public class PrescriptionController {
 
     @PostMapping
     @Operation(summary = "Create a new prescription")
-    public ResponseEntity<Prescription> createPrescription(@RequestBody PrescriptionDTO dto) {
-        Prescription saved = prescriptionService.createFromDTO(dto);
-        return ResponseEntity.ok(saved);
+    public ResponseEntity<PrescriptionResponseDTO> createPrescription(@RequestBody PrescriptionDTO prescriptionDTO) {
+        PrescriptionResponseDTO responseDTO = prescriptionService.createFromDTO(prescriptionDTO);
+        return ResponseEntity.ok(responseDTO);
     }
 
     @DeleteMapping("/{id}")
