@@ -11,4 +11,5 @@ public class PrescriptionMedicationDTO {
     private BigDecimal dosage;
     private String frequency;
     private Integer duration;
+    private BigDecimal totalDose;
 }

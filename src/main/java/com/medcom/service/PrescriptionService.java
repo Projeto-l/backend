@@ -39,28 +39,21 @@ public class PrescriptionService {
     }
 
     public PrescriptionResponseDTO createFromDTO(PrescriptionDTO dto) {
-        System.out.println("Received DTO: " + dto);
         if (dto.getUserId() == null) {
             throw new IllegalArgumentException("userId must not be null");
         }
-        // Carrega o User (garante que ele existe e esteja gerenciado)
         User user = userRepository.findById(dto.getUserId())
             .orElseThrow(() -> new IllegalArgumentException("User not found for ID: " + dto.getUserId()));
-        System.out.println("Loaded User: " + user);
 
         Prescription prescription = new Prescription();
         prescription.setUser(user);
         prescription.setPatientName(dto.getPatientName());
-        System.out.println("Created Prescription: " + prescription);
 
         if (dto.getItems() != null) {
             List<PrescriptionMedication> pmList = new ArrayList<>();
             for (PrescriptionMedicationDTO item : dto.getItems()) {
-                System.out.println("Processing PrescriptionMedicationDTO: " + item);
                 Medication managedMed = medicationRepository.findById(item.getMedicationId())
                     .orElseThrow(() -> new IllegalArgumentException("Medication not found for ID: " + item.getMedicationId()));
-                System.out.println("Loaded Medication: " + managedMed);
-
                 PrescriptionMedication pm = new PrescriptionMedication();
                 pm.setPrescription(prescription);
                 pm.setMedication(managedMed);
@@ -68,26 +61,22 @@ public class PrescriptionService {
                 pm.setDosage(item.getDosage());
                 pm.setFrequency(item.getFrequency());
                 pm.setDuration(item.getDuration());
-                System.out.println("Created PrescriptionMedication: " + pm);
+                pm.setTotalDose(item.getTotalDose());
                 pmList.add(pm);
             }
             prescription.setPrescriptionMedications(pmList);
             System.out.println("Final Prescription Medications List: " + pmList);
         }
         Prescription saved = prescriptionRepository.save(prescription);
-        System.out.println("Saved Prescription: " + saved);
 
-        // Extrai a lista de medicamentos usados (únicos) na prescrição
         List<Medication> medicationsUsed = saved.getPrescriptionMedications().stream()
                 .map(PrescriptionMedication::getMedication)
                 .distinct()
                 .collect(Collectors.toList());
 
-        // Chama o serviço de interações para verificar se há interações entre os medicamentos
         List<InteractionPairDTO> interactions = medicationInteractionService.findInteractions(medicationsUsed);
         System.out.println("Found interactions: " + interactions);
 
-        // Cria e retorna o DTO de resposta contendo a prescrição e as interações
         return new PrescriptionResponseDTO(saved, interactions);
     }
 
