@@ -21,7 +21,6 @@ import java.util.Optional;
 import org.springframework.http.*;
 import org.springframework.web.reactive.function.client.WebClient;
 
-
 @Service
 public class MedicationInteractionService {
 
@@ -56,31 +55,39 @@ public class MedicationInteractionService {
                 Optional<MedicationInteraction> interactionOpt = interactionRepository
                         .findByMedicationInterationId(med1.getMedicationId(), med2.getMedicationId());
 
-                MedicationInteraction interaction;
-
-                if (interactionOpt.isPresent()) {
-                    interaction = interactionOpt.get(); 
-                } else {
+                interactionOpt.ifPresentOrElse(
+                interaction -> {
+                    if (interaction.getThereIsConflict()) {
+                        interactionDTOs.add(buildInteractionDTO(interaction, med1, med2));
+                    }
+                },
+                () -> {
                     try {
-                        interaction = checkInteractionRequest(med1, med2); 
+                        MedicationInteraction interactionAPI = checkInteractionRequest(med1, med2);
+                        if (interactionAPI.getThereIsConflict()) {
+                            interactionDTOs.add(buildInteractionDTO(interactionAPI, med1, med2));
+                        }
                     } catch (Exception e) {
                         System.err.println("Erro ao buscar interação para " + med1.getName() + " e " + med2.getName()
                                 + ": " + e.getMessage());
-                        continue; 
                     }
                 }
-
-                interactionDTOs.add(new InteractionPairDTO(
-                        interaction.getId().getMedication1Id(),
-                        med1.getName(),
-                        interaction.getId().getMedication2Id(),
-                        med2.getName(),
-                        interaction.getDescription()));
-            }
+            );
         }
-        return interactionDTOs;
     }
-    
+    return interactionDTOs;
+    }
+
+    private InteractionPairDTO buildInteractionDTO(MedicationInteraction interaction, Medication med1, Medication med2) {
+        return new InteractionPairDTO(
+                interaction.getId().getMedication1Id(),
+                med1.getName(),
+                interaction.getId().getMedication2Id(),
+                med2.getName(),
+                interaction.getDescription()
+        );
+    }
+
     private MedicationInteraction checkInteractionRequest(Medication medication1, Medication medication2) {
         try {
             InteractionRequestDTO requestDto = new InteractionRequestDTO(medication1.getName(), medication2.getName());
@@ -102,14 +109,15 @@ public class MedicationInteractionService {
                     .retrieve()
                     .bodyToMono(InteractionResponseDTO.class)
                     .block();
-        }catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException("Erro ao enviar requisição para API de interação", e);
         }
     }
 
-    private MedicationInteraction saveInteraction(InteractionResponseDTO response, Medication medication1, Medication medication2) {
+    private MedicationInteraction saveInteraction(InteractionResponseDTO response, Medication medication1,
+            Medication medication2) {
         boolean thereIsConflict = response.getMedications().get(0).isThereIsConflict() &&
-                                  response.getMedications().get(1).isThereIsConflict();
+                response.getMedications().get(1).isThereIsConflict();
         String description = response.getDescription();
 
         MedicationInteractionId interactionId = new MedicationInteractionId();
