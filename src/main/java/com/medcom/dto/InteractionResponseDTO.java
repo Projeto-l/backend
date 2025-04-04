@@ -13,4 +13,7 @@ public class InteractionResponseDTO {
 
     @JsonProperty("medications")
     private List<MedicationsConflictDTO> medications;
+
+    @JsonProperty("alternatives")
+    private List<String> medicationsAlternatives;
 }

@@ -84,7 +84,8 @@ public class MedicationInteractionService {
                 med1.getName(),
                 interaction.getId().getMedication2Id(),
                 med2.getName(),
-                interaction.getDescription()
+                interaction.getDescription(),
+                interaction.getMedicationsAlternatives()
         );
     }
 
@@ -118,8 +119,21 @@ public class MedicationInteractionService {
             Medication medication2) {
         boolean thereIsConflict = response.getMedications().get(0).isThereIsConflict() &&
                 response.getMedications().get(1).isThereIsConflict();
+
         String description = response.getDescription();
 
+        List<String> alternatives = response.getMedicationsAlternatives();
+
+        String formattedAlternatives = "";
+
+        if (alternatives != null && !alternatives.isEmpty()) {
+            if (alternatives.size() == 1) {
+                formattedAlternatives = alternatives.get(0);
+            } else {
+                formattedAlternatives = String.join(", ", alternatives.subList(0, alternatives.size() - 1));
+                formattedAlternatives += " e " + alternatives.get(alternatives.size() - 1);
+            }
+        }
         MedicationInteractionId interactionId = new MedicationInteractionId();
         interactionId.setMedication1Id(medication1.getMedicationId());
         interactionId.setMedication2Id(medication2.getMedicationId());
@@ -128,6 +142,7 @@ public class MedicationInteractionService {
         interaction.setId(interactionId);
         interaction.setThereIsConflict(thereIsConflict);
         interaction.setDescription(description);
+        interaction.setMedicationsAlternatives(formattedAlternatives);
 
         return interactionRepository.save(interaction);
     }

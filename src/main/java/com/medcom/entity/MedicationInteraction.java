@@ -4,7 +4,6 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Data;
-import java.util.List;
 
 @Data
 @Entity
@@ -14,4 +13,5 @@ public class MedicationInteraction {
     private MedicationInteractionId id;
     private Boolean thereIsConflict;
     private String description;
+    private String medicationsAlternatives;
 }
