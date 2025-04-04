@@ -32,8 +32,8 @@ public class PrescriptionController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get prescription by ID")
-    public ResponseEntity<Prescription> getPrescriptionById(@PathVariable UUID id) {
-        return ResponseEntity.ok(prescriptionService.findById(id));
+    public ResponseEntity<PrescriptionResponseDTO> getPrescriptionById(@PathVariable UUID id) {
+        return ResponseEntity.ok(prescriptionService.findPrescriptionWhithInteractions(id));
     }
 
     @PostMapping

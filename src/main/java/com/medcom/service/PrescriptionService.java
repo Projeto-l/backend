@@ -129,6 +129,21 @@ public class PrescriptionService {
                 .orElseThrow(() -> new IllegalArgumentException("Prescription not found for ID: " + id));
     }
 
+    public PrescriptionResponseDTO findPrescriptionWhithInteractions(UUID id) {
+        Prescription prescription = prescriptionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Prescription not found for ID: " + id));
+    
+        List<Medication> medicationsUsed = prescription.getPrescriptionMedications().stream()
+                .map(PrescriptionMedication::getMedication)
+                .distinct()
+                .collect(Collectors.toList());
+    
+        List<InteractionPairDTO> interactions = medicationInteractionService.findInteractions(medicationsUsed);
+    
+        return new PrescriptionResponseDTO(prescription, interactions);
+    }
+    
+
     public void deleteById(UUID id) {
         prescriptionRepository.deleteById(id);
     }
