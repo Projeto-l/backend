@@ -11,6 +11,7 @@ import lombok.Data;
 public class MedicationInteraction {
     @EmbeddedId
     private MedicationInteractionId id;
-
+    private Boolean thereIsConflict;
     private String description;
+    private String medicationsAlternatives;
 }

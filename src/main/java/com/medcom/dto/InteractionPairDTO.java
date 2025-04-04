@@ -12,4 +12,5 @@ public class InteractionPairDTO {
     private UUID medication2Id;
     private String medication2Name;
     private String description;
+    private String medicationsAlternatives;
 }
