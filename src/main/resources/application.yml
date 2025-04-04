@@ -21,3 +21,13 @@ springdoc:
     path: /swagger-ui.html
     operations-sorter: alpha
     tags-sorter: alpha
+
+application:
+  security:
+    app:
+      frontend-path: ${FRONTEND_PATH:localhost}
+    jwt:
+      secret-key: ${SECRET_KEY_TOKEN:ZTkxZTQyZDc2MDU3ZDU4ZDFkYTM3MjVkZDU5NTM1ZDY=}
+      expiration: 1800000 # 30 min
+      refresh-token:
+        expiration: 7200000 # 2 hrs
