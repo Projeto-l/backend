@@ -28,17 +28,4 @@ public class Medication {
     @JsonManagedReference
     private List<Presentation> presentations;
 
-    public void addPresentation(Presentation presentation) {
-        presentations.add(presentation);
-    }
-
-    public void removePresentation(Presentation presentation) {
-        presentations.remove(presentation);
-    }
-
-    public void listPresentations() {
-        for (Presentation presentation : presentations) {
-            System.out.println("Presentation: " + presentation.getInfo() + ", Mg per unit: " + presentation.mgPerUnit());
-        }
-    }
 }
