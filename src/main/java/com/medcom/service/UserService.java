@@ -3,6 +3,7 @@ package com.medcom.service;
 import com.medcom.entity.User;
 import com.medcom.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,15 +23,16 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public Optional<User> findById(Integer id) {
+    public Optional<User> findById(UUID id) {
         return userRepository.findById(id);
     }
 
     public User save(User user) {
+        user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
         return userRepository.save(user);
     }
 
-    public void deleteById(Integer id) {
+    public void deleteById(UUID id) {
         userRepository.deleteById(id);
     }
 }

@@ -19,12 +19,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    public static void main(String[] args) {
-        PasswordEncoder encoder = new BCryptPasswordEncoder();
-
-        System.out.println(encoder.encode("123456"));
-    }
-
     private final UserRepository userRepository;
 
     @Override

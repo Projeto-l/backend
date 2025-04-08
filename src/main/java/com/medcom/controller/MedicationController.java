@@ -29,7 +29,7 @@ public class MedicationController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get medication by ID")
-    public ResponseEntity<Optional<Medication>> getMedicationById(@PathVariable Integer id) {
+    public ResponseEntity<Optional<Medication>> getMedicationById(@PathVariable UUID id) {
         return ResponseEntity.ok(medicationService.findById(id));
     }
 
@@ -41,7 +41,7 @@ public class MedicationController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete medication by ID")
-    public ResponseEntity<Void> deleteMedication(@PathVariable Integer id) {
+    public ResponseEntity<Void> deleteMedication(@PathVariable UUID id) {
         medicationService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

@@ -2,8 +2,10 @@ package com.medcom.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.util.List;
 import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
@@ -17,9 +19,7 @@ public class Medication {
 
     private String name;
 
-
     private Double defaultDosePerDay;
-
 
     private Double defaultDosePerAdministration;
 
