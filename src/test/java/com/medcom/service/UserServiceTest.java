@@ -33,7 +33,7 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
         user = new User();
-        user.setUserId(1);
+        user.setUserId(UUID.randomUUID());
         user.setName("Dr. Alice");
         user.setEmail("alice@example.com");
         user.setPassword("securepassword");
