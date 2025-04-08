@@ -80,6 +80,46 @@ public class PrescriptionService {
         return new PrescriptionResponseDTO(saved, interactions);
     }
 
+    public PrescriptionResponseDTO updatePrescription(UUID prescriptionID, PrescriptionDTO prescriptionDTO){
+        Prescription prescriptionEdited = findById(prescriptionID);
+
+        List<PrescriptionMedication> prescriptionMedications = prescriptionEdited.getPrescriptionMedications();
+        List<PrescriptionMedication> updatedMedications = new ArrayList<>();
+
+        for (PrescriptionMedicationDTO prescription : prescriptionDTO.getItems()) {
+            PrescriptionMedication existingMedication = prescriptionMedications.stream()
+                .filter(pm -> pm.getMedication().getMedicationId().equals(prescription.getMedicationId()))
+                .findFirst()
+                .orElse(null);
+
+            if (existingMedication != null) {
+                existingMedication.setDosage(prescription.getDosage());
+                existingMedication.setFrequency(prescription.getFrequency());
+                existingMedication.setDuration(prescription.getDuration());
+                existingMedication.setNotes(prescription.getNotes());
+                updatedMedications.add(existingMedication);
+            }
+        }
+
+        prescriptionMedications.removeIf(pm -> 
+                updatedMedications.stream().noneMatch(updated -> updated.getMedication().getMedicationId().equals(pm.getMedication().getMedicationId())));
+
+        prescriptionEdited.getPrescriptionMedications().clear();
+        prescriptionEdited.getPrescriptionMedications().addAll(updatedMedications);
+            
+        Prescription saved = prescriptionRepository.save(prescriptionEdited);
+
+        List<Medication> medications = saved.getPrescriptionMedications().stream()
+            .map(PrescriptionMedication::getMedication)
+            .distinct()
+            .collect(Collectors.toList());
+
+        List<InteractionPairDTO> interactions = medicationInteractionService.findInteractions(medications);
+
+        return new PrescriptionResponseDTO(saved, interactions);
+
+    }
+
     public List<Prescription> findAll() {
         return prescriptionRepository.findAll();
     }
@@ -88,6 +128,21 @@ public class PrescriptionService {
         return prescriptionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Prescription not found for ID: " + id));
     }
+
+    public PrescriptionResponseDTO findPrescriptionWhithInteractions(UUID id) {
+        Prescription prescription = prescriptionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Prescription not found for ID: " + id));
+    
+        List<Medication> medicationsUsed = prescription.getPrescriptionMedications().stream()
+                .map(PrescriptionMedication::getMedication)
+                .distinct()
+                .collect(Collectors.toList());
+    
+        List<InteractionPairDTO> interactions = medicationInteractionService.findInteractions(medicationsUsed);
+    
+        return new PrescriptionResponseDTO(prescription, interactions);
+    }
+    
 
     public void deleteById(UUID id) {
         prescriptionRepository.deleteById(id);
