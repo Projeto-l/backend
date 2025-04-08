@@ -13,13 +13,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**")) // Desativa CSRF para H2
-                .headers(headers -> headers.frameOptions().disable()) // Permite frames para o console do H2
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/**").permitAll()
-
-                        .anyRequest().authenticated()) // Protege outras rotas
-                .formLogin(); // Mantém login para outras páginas
+            .csrf(csrf -> csrf
+                .ignoringRequestMatchers("/h2-console/**", "/api/prescriptions/**","/api/presentations/**", "/api/dose-calculation/**", "/api/favorites/**", "/api/medications/**")
+            )
+            .headers(headers -> headers.frameOptions().disable())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/**").permitAll()
+            )
+            .formLogin();
 
         return http.build();
     }
