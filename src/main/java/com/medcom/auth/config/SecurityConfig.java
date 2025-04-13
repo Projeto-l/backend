@@ -45,7 +45,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
+        /*http
                 .cors(c -> c.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
@@ -61,9 +61,20 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint()));
 
+        return http.build();*/
+
+        http
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/h2-console/**", "/api/prescriptions/**","/api/presentations/**", "/api/dose-calculation/**", "/api/favorites/**", "/api/medications/**", "/api/users/**", "/h2-console/**")
+                )
+                .headers(headers -> headers.frameOptions().disable())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/**").permitAll()
+                )
+                .formLogin();
+
         return http.build();
     }
-
     @Bean
     public PasswordEncoder encoder() {
         return new BCryptPasswordEncoder();
