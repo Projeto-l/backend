@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.security.Key;
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 @Service
@@ -39,8 +40,8 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(Authentication authentication) {
-        return generateToken(Map.of("email", authentication.getName(), "permissions", authentication.getAuthorities()), authentication);
+    public String generateToken(Authentication authentication, UUID userid) {
+        return generateToken(Map.of("userId", userid, "email", authentication.getName(), "permissions", authentication.getAuthorities()), authentication);
     }
 
     public String generateToken(Map<String, Object> extraClaims, Authentication authentication) {

@@ -11,6 +11,8 @@ import java.util.List;
 @Getter
 public class AuthUser extends org.springframework.security.core.userdetails.User {
 
+
+
     public AuthUser(User user) {
         super(user.getEmail(), user.getPassword(), getAuthorities(user));
     }

@@ -32,12 +32,12 @@ public class SecurityConfig {
 
     private static final String[] WHITE_LIST_URL = {
             "/api/v1/auth/**",
-            "/api/test/**",
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-ui.html",
-            "*/api-docs"
+            "/api-docs/**",
     };
+
     private final JwtAuthFilter jwtAuthFilter;
 
     @Value("${application.security.app.frontend-path}")
