@@ -1,11 +1,13 @@
 package com.medcom.auth.controller;
 
+import com.medcom.auth.dto.AuthRequestDTO;
 import com.medcom.auth.dto.TokenResponseDTO;
 import com.medcom.auth.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,7 +20,7 @@ public class AuthController {
     private final AuthenticationService authService;
 
     @PostMapping
-    public ResponseEntity<TokenResponseDTO> login(Authentication authentication) {
-        return ResponseEntity.ok(authService.authenticate(authentication));
+    public ResponseEntity<TokenResponseDTO> login(@RequestBody AuthRequestDTO authRequest) {
+        return ResponseEntity.ok(authService.authenticate(authRequest));
     }
 }
