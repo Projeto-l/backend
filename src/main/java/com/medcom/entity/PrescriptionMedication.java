@@ -38,7 +38,6 @@ public class PrescriptionMedication {
     @Column(name = "duration")
     private Integer duration;
     
-    
     @Column(name = "total_dose")
     private BigDecimal totalDose;
 

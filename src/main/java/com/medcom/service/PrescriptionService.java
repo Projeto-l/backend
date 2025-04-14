@@ -1,5 +1,13 @@
 package com.medcom.service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
+import com.medcom.dto.AddMedicationToPrescriptionDTO;
 import com.medcom.dto.InteractionPairDTO;
 import com.medcom.dto.PrescriptionDTO;
 import com.medcom.dto.PrescriptionMedicationDTO;
@@ -11,13 +19,9 @@ import com.medcom.entity.User;
 import com.medcom.repository.MedicationRepository;
 import com.medcom.repository.PrescriptionRepository;
 import com.medcom.repository.UserRepository;
-import jakarta.transaction.Transactional;
-import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 
 @Service
 @Transactional
@@ -29,9 +33,9 @@ public class PrescriptionService {
     private final MedicationInteractionService medicationInteractionService;
 
     public PrescriptionService(PrescriptionRepository prescriptionRepository,
-                               MedicationRepository medicationRepository,
-                               UserRepository userRepository,
-                               MedicationInteractionService medicationInteractionService) {
+            MedicationRepository medicationRepository,
+            UserRepository userRepository,
+            MedicationInteractionService medicationInteractionService) {
         this.prescriptionRepository = prescriptionRepository;
         this.medicationRepository = medicationRepository;
         this.userRepository = userRepository;
@@ -43,7 +47,7 @@ public class PrescriptionService {
             throw new IllegalArgumentException("userId must not be null");
         }
         User user = userRepository.findById(dto.getUserId())
-            .orElseThrow(() -> new IllegalArgumentException("User not found for ID: " + dto.getUserId()));
+                .orElseThrow(() -> new IllegalArgumentException("User not found for ID: " + dto.getUserId()));
 
         Prescription prescription = new Prescription();
         prescription.setUser(user);
@@ -53,7 +57,8 @@ public class PrescriptionService {
             List<PrescriptionMedication> pmList = new ArrayList<>();
             for (PrescriptionMedicationDTO item : dto.getItems()) {
                 Medication managedMed = medicationRepository.findById(item.getMedicationId())
-                    .orElseThrow(() -> new IllegalArgumentException("Medication not found for ID: " + item.getMedicationId()));
+                        .orElseThrow(() -> new IllegalArgumentException(
+                                "Medication not found for ID: " + item.getMedicationId()));
                 PrescriptionMedication pm = new PrescriptionMedication();
                 pm.setPrescription(prescription);
                 pm.setMedication(managedMed);
@@ -80,7 +85,7 @@ public class PrescriptionService {
         return new PrescriptionResponseDTO(saved, interactions);
     }
 
-    public PrescriptionResponseDTO updatePrescription(UUID prescriptionID, PrescriptionDTO prescriptionDTO){
+    public PrescriptionResponseDTO updatePrescription(UUID prescriptionID, PrescriptionDTO prescriptionDTO) {
         Prescription prescriptionEdited = findById(prescriptionID);
 
         List<PrescriptionMedication> prescriptionMedications = prescriptionEdited.getPrescriptionMedications();
@@ -88,9 +93,9 @@ public class PrescriptionService {
 
         for (PrescriptionMedicationDTO prescription : prescriptionDTO.getItems()) {
             PrescriptionMedication existingMedication = prescriptionMedications.stream()
-                .filter(pm -> pm.getMedication().getMedicationId().equals(prescription.getMedicationId()))
-                .findFirst()
-                .orElse(null);
+                    .filter(pm -> pm.getMedication().getMedicationId().equals(prescription.getMedicationId()))
+                    .findFirst()
+                    .orElse(null);
 
             if (existingMedication != null) {
                 existingMedication.setDosage(prescription.getDosage());
@@ -101,8 +106,13 @@ public class PrescriptionService {
             }
         }
 
-        prescriptionMedications.removeIf(pm ->
-                updatedMedications.stream().noneMatch(updated -> updated.getMedication().getMedicationId().equals(pm.getMedication().getMedicationId())));
+        prescriptionMedications.removeIf(pm -> updatedMedications.stream().noneMatch(
+                updated -> updated.getMedication().getMedicationId().equals(pm.getMedication().getMedicationId())));
+
+        if (updatedMedications.isEmpty()) {
+            deleteById(prescriptionID);
+            return new PrescriptionResponseDTO(null, List.of());
+        }
 
         prescriptionEdited.getPrescriptionMedications().clear();
         prescriptionEdited.getPrescriptionMedications().addAll(updatedMedications);
@@ -110,9 +120,47 @@ public class PrescriptionService {
         Prescription saved = prescriptionRepository.save(prescriptionEdited);
 
         List<Medication> medications = saved.getPrescriptionMedications().stream()
-            .map(PrescriptionMedication::getMedication)
-            .distinct()
-            .collect(Collectors.toList());
+                .map(PrescriptionMedication::getMedication)
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<InteractionPairDTO> interactions = medicationInteractionService.findInteractions(medications);
+
+        return new PrescriptionResponseDTO(saved, interactions);
+
+    }
+
+    public PrescriptionResponseDTO addMedicationToPrescription(UUID prescriptionId,
+            AddMedicationToPrescriptionDTO addMedicationToPrescriptionDTO) {
+        Prescription prescription = findById(prescriptionId);
+
+        Medication medication = medicationRepository.findById(addMedicationToPrescriptionDTO.getMedicationId())
+                .orElseThrow(() -> new EntityNotFoundException("Medicamento não encontrado."));
+
+        boolean alreadyExists = prescription.getPrescriptionMedications().stream()
+                .anyMatch(pm -> pm.getMedication().getMedicationId().equals(medication.getMedicationId()));
+
+        if (alreadyExists) {
+            throw new IllegalArgumentException("Este medicamento já está presente na prescrição.");
+        }
+
+        PrescriptionMedication prescriptionMedication = new PrescriptionMedication();
+        prescriptionMedication.setPrescription(prescription);
+        prescriptionMedication.setMedication(medication);
+        prescriptionMedication.setDosage(addMedicationToPrescriptionDTO.getDosage());
+        prescriptionMedication.setFrequency(addMedicationToPrescriptionDTO.getFrequency());
+        prescriptionMedication.setDuration(addMedicationToPrescriptionDTO.getDuration());
+        prescriptionMedication.setNotes(addMedicationToPrescriptionDTO.getNotes());
+        prescriptionMedication.setTotalDose(addMedicationToPrescriptionDTO.getTotalDose());
+
+        prescription.getPrescriptionMedications().add(prescriptionMedication);
+
+        Prescription saved = prescriptionRepository.save(prescription);
+
+        List<Medication> medications = saved.getPrescriptionMedications().stream()
+                .map(PrescriptionMedication::getMedication)
+                .distinct()
+                .collect(Collectors.toList());
 
         List<InteractionPairDTO> interactions = medicationInteractionService.findInteractions(medications);
 
@@ -142,7 +190,6 @@ public class PrescriptionService {
 
         return new PrescriptionResponseDTO(prescription, interactions);
     }
-
 
     public void deleteById(UUID id) {
         prescriptionRepository.deleteById(id);

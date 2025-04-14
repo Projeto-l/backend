@@ -1,10 +1,9 @@
 package com.medcom.controller;
 
+import com.medcom.dto.AddMedicationToPrescriptionDTO;
 import com.medcom.dto.PrescriptionDTO;
 import com.medcom.dto.PrescriptionResponseDTO;
-import com.medcom.dto.PresentationDTO;
 import com.medcom.entity.Prescription;
-import com.medcom.entity.Presentation;
 import com.medcom.service.PrescriptionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -47,6 +46,13 @@ public class PrescriptionController {
     @Operation(summary = "Update a prescription")
     public ResponseEntity<PrescriptionResponseDTO> updatePrescription(@PathVariable UUID id, @RequestBody PrescriptionDTO prescriptionDTO) {
         PrescriptionResponseDTO updatedDTO = prescriptionService.updatePrescription(id, prescriptionDTO);
+        return ResponseEntity.ok(updatedDTO);
+    }
+
+    @PostMapping("/{id}/medications")
+    @Operation(summary = "Add a medication to a prescription")
+    public ResponseEntity<PrescriptionResponseDTO> addMedicationToPrescription(@PathVariable UUID id, @RequestBody AddMedicationToPrescriptionDTO addMedicationToPrescriptionDTO) {
+        PrescriptionResponseDTO updatedDTO = prescriptionService.addMedicationToPrescription(id, addMedicationToPrescriptionDTO);
         return ResponseEntity.ok(updatedDTO);
     }
 
