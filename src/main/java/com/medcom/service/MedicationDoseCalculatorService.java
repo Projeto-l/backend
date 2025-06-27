@@ -2,6 +2,8 @@ package com.medcom.service;
 
 import com.medcom.dto.DoseCalculationRequestDTO;
 import com.medcom.dto.DoseCalculationResponseDTO;
+import com.medcom.dto.VerifyDoseRequestDTO;
+import com.medcom.dto.VerifyDoseResponseDTO;
 import com.medcom.entity.Drops;
 import com.medcom.entity.Medication;
 import com.medcom.entity.OralSuspension;
@@ -99,4 +101,29 @@ public class MedicationDoseCalculatorService {
         response.setMessage("Dose calculated successfully");
         return response;
     }
+
+    public VerifyDoseResponseDTO verifyDose(VerifyDoseRequestDTO request) {
+    DoseCalculationResponseDTO calculated = this.calculateDose(request.toDoseCalculationRequestDTO());
+    double expectedDose = calculated.getCalculatedDose();
+
+    double tolerancePercentage = 0.05; // 5%
+    double toleranceAbsolute = 0.1;    // 0.1 mínimo
+
+    double tolerance = Math.max(expectedDose * tolerancePercentage, toleranceAbsolute);
+    double lowerBound = expectedDose - tolerance;
+    double upperBound = expectedDose + tolerance;
+
+    boolean isCorrect = request.getTakenDose() >= lowerBound && request.getTakenDose() <= upperBound;
+
+    VerifyDoseResponseDTO response = new VerifyDoseResponseDTO();
+    response.setCorrect(isCorrect);
+    response.setExpectedDose(expectedDose);
+    response.setTakenDose(request.getTakenDose());
+    response.setMessage(isCorrect
+            ? "A dose está correta dentro da faixa de tolerância."
+            : "A dose informada está fora da faixa recomendada. Dose esperada: " + expectedDose + ", dose informada: " + request.getTakenDose());
+
+    return response;
+}
+
 }

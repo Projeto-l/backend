@@ -14,7 +14,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/h2-console/**", "/api/prescriptions/**","/api/presentations/**", "/api/dose-calculation/**", "/api/favorites/**", "/api/medications/**")
+                .ignoringRequestMatchers("/h2-console/**", "/api/prescriptions/**","/api/presentations/**", "/api/dose-calculation/**", "/api/favorites/**", "/api/medications/**", "/api/verify-dose/**")
             )
             .headers(headers -> headers.frameOptions().disable())
             .authorizeHttpRequests(auth -> auth
