@@ -65,7 +65,7 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/h2-console/**", "/api/prescriptions/**","/api/presentations/**", "/api/dose-calculation/**", "/api/favorites/**", "/api/medications/**", "/api/users/**", "/h2-console/**", "/api/v1/auth/**", "/api/verify-dose/**" )
+                        .ignoringRequestMatchers("/h2-console/**", "/api/prescriptions/**","/api/presentations/**", "/api/dose-calculation/**", "/api/favorites/**", "/api/medications/**", "/api/users/**", "/h2-console/**", "/api/v1/auth/**", "/api/verify-dose/**", "/api/templates/**" )
                 )
                 .headers(headers -> headers.frameOptions().disable())
                 .authorizeHttpRequests(auth -> auth
