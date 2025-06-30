@@ -25,32 +25,38 @@ public class MedicationDoseCalculatorService {
      * Realiza o cálculo da dose para uma apresentação de medicação.
      * 
      * Para "mg/kg/dose":
-     *   - Solução Oral: volume (mL) = (peso * dose padrão) / (mg/mL)
-     *   - Comprimido: número de comprimidos = (peso * dose padrão) / (mg por comprimido)
-     *   - Gotas: número de gotas = (peso * dose padrão) / (mg por gota)
+     * - Solução Oral: volume (mL) = (peso * dose padrão) / (mg/mL)
+     * - Comprimido: número de comprimidos = (peso * dose padrão) / (mg por
+     * comprimido)
+     * - Gotas: número de gotas = (peso * dose padrão) / (mg por gota)
      * Para "mg/kg/day":
-     *   - Número de doses diárias = 24 / intervalo (horas)
-     *   - Solução Oral: volume (mL) = [(peso * dose padrão) / dosesDiarias] / (mg/mL)
-     *   - Comprimido: número de comprimidos = [(peso * dose padrão) / dosesDiarias] / (mg por comprimido)
-     *   - Gotas: número de gotas = [(peso * dose padrão) / dosesDiarias] / (mg por gota)
+     * - Número de doses diárias = 24 / intervalo (horas)
+     * - Solução Oral: volume (mL) = [(peso * dose padrão) / dosesDiarias] / (mg/mL)
+     * - Comprimido: número de comprimidos = [(peso * dose padrão) / dosesDiarias] /
+     * (mg por comprimido)
+     * - Gotas: número de gotas = [(peso * dose padrão) / dosesDiarias] / (mg por
+     * gota)
      * 
      * Para comprimidos, o resultado é arredondado para o múltiplo de 0,25;
      * para gotas, para o número inteiro mais próximo.
      *
      * @param request DTO com os parâmetros: medicationId, presentationId,
-     *                calculationType ("mg/kg/dose" ou "mg/kg/day"), standardDose, weight e interval.
+     *                calculationType ("mg/kg/dose" ou "mg/kg/day"), standardDose,
+     *                weight e interval.
      * @return DTO com a dose calculada e uma mensagem.
      */
     public DoseCalculationResponseDTO calculateDose(DoseCalculationRequestDTO request) {
         // Carrega o medicamento do banco de dados
         Medication medication = medicationRepository.findById(request.getMedicationId())
-            .orElseThrow(() -> new IllegalArgumentException("Medication not found for ID: " + request.getMedicationId()));
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Medication not found for ID: " + request.getMedicationId()));
 
         // Procura pela apresentação com o ID informado
         Presentation presentation = medication.getPresentations().stream()
-            .filter(p -> p.getIdPresentation().equals(request.getPresentationId()))
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("Presentation not found for ID: " + request.getPresentationId()));
+                .filter(p -> p.getIdPresentation().equals(request.getPresentationId()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Presentation not found for ID: " + request.getPresentationId()));
 
         double calculatedDose;
 
@@ -103,27 +109,44 @@ public class MedicationDoseCalculatorService {
     }
 
     public VerifyDoseResponseDTO verifyDose(VerifyDoseRequestDTO request) {
-    DoseCalculationResponseDTO calculated = this.calculateDose(request.toDoseCalculationRequestDTO());
-    double expectedDose = calculated.getCalculatedDose();
+        Medication medication = medicationRepository.findById(request.getMedicationId())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Medication not found for ID: " + request.getMedicationId()));
 
-    double tolerancePercentage = 0.05; // 5%
-    double toleranceAbsolute = 0.1;    // 0.1 mínimo
+        Presentation presentation = medication.getPresentations().stream()
+                .filter(p -> p.getIdPresentation().equals(request.getPresentationId()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Presentation not found for ID: " + request.getPresentationId()));
 
-    double tolerance = Math.max(expectedDose * tolerancePercentage, toleranceAbsolute);
-    double lowerBound = expectedDose - tolerance;
-    double upperBound = expectedDose + tolerance;
+        double mgKgDose;
+        double weight = request.getWeight();
+        double takenDose = request.getTakenDose();
+        double dosesPerDay = 24.0 / request.getInterval();
 
-    boolean isCorrect = request.getTakenDose() >= lowerBound && request.getTakenDose() <= upperBound;
+        if (presentation instanceof OralSuspension) {
+            OralSuspension oralSuspension = (OralSuspension) presentation;
+            double concentration = oralSuspension.getMgPerMl();
+            mgKgDose = (takenDose * concentration) / weight;
+        } else if (presentation instanceof Tablet) {
+            Tablet tablet = (Tablet) presentation;
+            double mgPerTablet = tablet.getMgPerTablet();
+            mgKgDose = (takenDose * mgPerTablet) / weight;
+        } else if (presentation instanceof Drops) {
+            Drops drops = (Drops) presentation;
+            double mgPerDrop = drops.getMgPerMl() * drops.getMlPerDrop();
+            mgKgDose = (takenDose * mgPerDrop) / weight;
+        } else {
+            throw new IllegalArgumentException("Presentation type not supported for dose verification");
+        }
 
-    VerifyDoseResponseDTO response = new VerifyDoseResponseDTO();
-    response.setCorrect(isCorrect);
-    response.setExpectedDose(expectedDose);
-    response.setTakenDose(request.getTakenDose());
-    response.setMessage(isCorrect
-            ? "A dose está correta dentro da faixa de tolerância."
-            : "A dose informada está fora da faixa recomendada. Dose esperada: " + expectedDose + ", dose informada: " + request.getTakenDose());
+        double mgKgDay = mgKgDose * dosesPerDay;
 
-    return response;
-}
+        VerifyDoseResponseDTO response = new VerifyDoseResponseDTO();
+        response.setMgKgDose(mgKgDose);
+        response.setMgKgDay(mgKgDay);
+
+        return response;
+    }
 
 }
